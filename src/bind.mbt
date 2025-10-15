@@ -25,6 +25,7 @@ extern "c" fn sqlite3_bind_int64(
 ) -> Int = "sqlite3_bind_int64"
 
 ///|
+#borrow(value)
 extern "c" fn sqlite3_bind_bytes(
   stmt : Statement,
   param_index : Int,
@@ -33,6 +34,7 @@ extern "c" fn sqlite3_bind_bytes(
 ) -> Int = "moonbit_sqlite3_bind_bytes"
 
 ///|
+#borrow(value)
 extern "c" fn sqlite3_bind_string(
   stmt : Statement,
   param_index : Int,

@@ -22,6 +22,7 @@ extern "c" fn UTF8StrRef::malloc() -> UTF8StrRef = "moonbit_sqlite3_mkref"
 // TODO: fix tail
 
 ///|
+#borrow(stmt)
 extern "c" fn sqlite3_prepare(
   conn : Connection,
   stmt : Bytes,
@@ -43,7 +44,7 @@ pub fn Connection::prepare(
   stmt : String,
   loc~ : SourceLoc,
 ) -> Statement raise SqliteError {
-  let stmt = @encoding.encode(stmt, encoding = UTF8)
+  let stmt = @encoding/utf8.encode(stmt)
   let len = stmt.length()
   let out = StatementRef::malloc()
   let tail = UTF8StrRef::malloc()

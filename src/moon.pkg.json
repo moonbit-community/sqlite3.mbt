@@ -1,7 +1,4 @@
 {
-    "import" : [
-        "tonyfettes/encoding"
-    ],
     "native-stub": [
         "mbt_sqlite3.c",
         "sqlite3.c"

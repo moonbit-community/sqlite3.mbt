@@ -13,6 +13,7 @@ extern "c" fn ConnectionRef::malloc() -> ConnectionRef = "moonbit_sqlite3_mkref"
 extern "c" fn ConnectionRef::read(self : ConnectionRef) -> Connection = "moonbit_sqlite3_readref"
 
 ///|
+#borrow(filename)
 extern "c" fn sqlite3_open(filename : Bytes, out : ConnectionRef) -> Int = "sqlite3_open"
 
 ///|
@@ -25,7 +26,7 @@ pub fn Connection::open(
   loc~ : SourceLoc,
 ) -> Connection raise SqliteError {
   let buf = @buffer.new(size_hint=filename.length() * 2)
-  @encoding.encode_to(filename, buf, encoding=UTF8)
+  buf.write_string_utf8(filename)
   buf.write_byte(0x00)
   let filename = buf.contents()
   let out = ConnectionRef::malloc()

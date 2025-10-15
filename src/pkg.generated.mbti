@@ -76,6 +76,8 @@ const SQLITE_WARNING : Int = 28
 
 // Errors
 pub suberror SqliteError (Int, SourceLoc)
+fn SqliteError::output(Self, &Logger) -> Unit // from trait `Show`
+fn SqliteError::to_string(Self) -> String // from trait `Show`
 impl Show for SqliteError
 
 // Types and methods

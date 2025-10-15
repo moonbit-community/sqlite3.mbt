@@ -7,5 +7,5 @@ extern "c" fn sqlite3_errmsg(conn : Connection) -> Bytes = "moonbit_sqlite3_errm
 ///|
 pub fn Connection::get_errmsg(conn : Connection) -> String {
   let utf8str = sqlite3_errmsg(conn)
-  @encoding.decoder(UTF8).decode_lossy(utf8str)
+  @encoding/utf8.decode_lossy(utf8str)
 }
