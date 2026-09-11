@@ -48,5 +48,11 @@ jobs:
           ulimit -s 8176
 
       - name: moon test
+        env:
+          MOONBIT_ASYNC_CHECK_FD_LEAK: 1
         run: |
           moon test
+
+      - name: native completion sanitizer regression
+        if: runner.os != 'Windows'
+        run: python scripts/test-native-completion.py
