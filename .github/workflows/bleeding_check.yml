@@ -56,4 +56,9 @@ jobs:
           git diff --exit-code
 
       - name: moon test
+        env:
+          MOONBIT_ASYNC_CHECK_FD_LEAK: 1
         run: moon test --target wasm
+
+      - name: Wasm I/O error contract
+        run: python scripts/test-wasm-errors.py

@@ -1,5 +1,6 @@
 import {
-  "moonbitlang/core/debug",
+  "moonbitlang/async",
+  "moonbitlang/async/os_error",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/lexbuf",
   "moonbit-community/sqlite3/internal/ffi",
@@ -7,6 +8,7 @@ import {
 
 import {
   "moonbitlang/core/test",
+  "moonbitlang/async/fs",
 } for "test"
 
 // The compiler currently emits warning 79 for public derived/implemented
