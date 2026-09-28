@@ -111,7 +111,7 @@ async test "async I/O error contract" {
     task.cancel()
     continue_open.release()
     task.wait() catch {
-      error if @async.is_cancellation_error(error) => ()
+      @async.WaitedTaskAlreadyCancelled => ()
       error => raise error
     }
   }
