@@ -503,7 +503,7 @@ async test "cancelled async open discards its result" {
     task.cancel()
     continue_open.release()
     task.wait() catch {
-      error if @async.is_cancellation_error(error) => ()
+      @async.WaitedTaskAlreadyCancelled => ()
       error => raise error
     }
   }
@@ -530,7 +530,7 @@ async test "cancelled queued prepare releases its statement and connection" {
     prepare_started.acquire()
     task.cancel()
     task.wait() catch {
-      error if @async.is_cancellation_error(error) => ()
+      @async.WaitedTaskAlreadyCancelled => ()
       error => raise error
     }
   }
