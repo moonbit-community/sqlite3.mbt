@@ -1,5 +1,12 @@
 supported_targets = "native+wasm"
 
+// The imports are target-specific: `moonbitlang/async` is only used by
+// ffi_async_wasm.mbt (wasm) and `moonbitlang/async/types` only by
+// ffi_native.mbt (native). moon.pkg has no per-target imports, so each target
+// reports the other's import as unused (warning 29, unused_package).
+
+warnings = "-29"
+
 import {
   "moonbitlang/async",
   "moonbitlang/async/os_error",
