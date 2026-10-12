@@ -23,8 +23,8 @@ struct Sqlite3StepJob(Sqlite3Job)
 pub fn sqlite3_open_job(
   executor : Sqlite3Executor,
   filename : Bytes,
-  flags : Int,
-  rescode : Ref[Int],
+  flags : Int32,
+  rescode : Ref[Int32],
 ) -> Sqlite3OpenJob raise {
   let (notification, notifier) = @pipe.pipe()
   defer notifier.close()
@@ -52,7 +52,7 @@ pub fn sqlite3_prepare_job(
   executor : Sqlite3Executor,
   database : Sqlite3,
   sql : String,
-  rescode : Ref[Int],
+  rescode : Ref[Int32],
 ) -> Sqlite3PrepareJob raise {
   let (notification, notifier) = @pipe.pipe()
   defer notifier.close()
@@ -80,7 +80,7 @@ pub fn sqlite3_step_job(
   executor : Sqlite3Executor,
   database : Sqlite3,
   statement : Sqlite3Stmt,
-  rescode : Ref[Int],
+  rescode : Ref[Int32],
 ) -> Sqlite3StepJob raise {
   let (notification, notifier) = @pipe.pipe()
   defer notifier.close()
@@ -121,12 +121,12 @@ fn Sqlite3Job::acquire_result(self : Sqlite3Job) -> Bool {
 }
 
 ///|
-fn Sqlite3Job::rescode(self : Sqlite3Job) -> Int {
+fn Sqlite3Job::rescode(self : Sqlite3Job) -> Int32 {
   sqlite3_job_rescode_impl(self.handle)
 }
 
 ///|
-fn Sqlite3Job::extended_rescode(self : Sqlite3Job) -> Int {
+fn Sqlite3Job::extended_rescode(self : Sqlite3Job) -> Int32 {
   sqlite3_job_extended_rescode_impl(self.handle)
 }
 
@@ -149,7 +149,7 @@ pub async fn Sqlite3OpenJob::wait(self : Sqlite3OpenJob) -> Unit {
 }
 
 ///|
-pub fn Sqlite3OpenJob::result(self : Sqlite3OpenJob) -> (Int, Int, String) {
+pub fn Sqlite3OpenJob::result(self : Sqlite3OpenJob) -> (Int32, Int32, String) {
   (self.job.rescode(), self.job.extended_rescode(), self.job.message())
 }
 
@@ -183,7 +183,7 @@ pub async fn Sqlite3PrepareJob::wait(self : Sqlite3PrepareJob) -> Unit {
 ///|
 pub fn Sqlite3PrepareJob::result(
   self : Sqlite3PrepareJob,
-) -> (Int, Int, String, Int) {
+) -> (Int32, Int32, String, Int32) {
   (
     self.job.rescode(),
     self.job.extended_rescode(),
@@ -224,7 +224,7 @@ pub async fn Sqlite3StepJob::wait(self : Sqlite3StepJob) -> Unit {
 ///|
 pub fn Sqlite3StepJob::result(
   self : Sqlite3StepJob,
-) -> (Int, Int, String, Int64?) {
+) -> (Int32, Int32, String, Int64?) {
   let changes = if sqlite3_step_job_has_changes_impl(self.0.handle) {
     Some(sqlite3_step_job_changes_impl(self.0.handle))
   } else {

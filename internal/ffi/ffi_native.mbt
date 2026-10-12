@@ -21,7 +21,7 @@ priv type Sqlite3JobHandle
 ///|
 #borrow(rescode)
 extern "c" fn sqlite3_executor_create_impl(
-  rescode : Ref[Int],
+  rescode : Ref[Int32],
 ) -> Sqlite3ExecutorHandle = "moonbit_sqlite3_executor_create"
 
 ///|
@@ -54,8 +54,8 @@ fn sqlite3_db_mutex_leave_impl(database : Sqlite3Handle) -> Unit {
 #borrow(filename, rescode)
 extern "c" fn sqlite3_open_v2_impl(
   filename : Bytes,
-  flags : Int,
-  rescode : Ref[Int],
+  flags : Int32,
+  rescode : Ref[Int32],
 ) -> Sqlite3Handle = "moonbit_sqlite3_open_v2"
 
 ///|
@@ -63,10 +63,10 @@ extern "c" fn sqlite3_open_v2_impl(
 extern "c" fn sqlite3_open_job_impl(
   executor : Sqlite3ExecutorHandle,
   filename : Bytes,
-  flags : Int,
+  flags : Int32,
   notification : @types.Fd,
   discard_notification : @types.Fd,
-  rescode : Ref[Int],
+  rescode : Ref[Int32],
 ) -> Sqlite3JobHandle = "moonbit_sqlite3_open_job"
 
 ///|
@@ -78,7 +78,7 @@ extern "c" fn sqlite3_open_job_database_impl(
 extern "c" fn sqlite3_open_job_release_impl(job : Sqlite3JobHandle) -> Unit = "moonbit_sqlite3_open_job_release"
 
 ///|
-extern "c" fn sqlite3_close_impl(db : Sqlite3Handle) -> Int = "sqlite3_close"
+extern "c" fn sqlite3_close_impl(db : Sqlite3Handle) -> Int32 = "sqlite3_close"
 
 ///|
 extern "c" fn sqlite3_is_null_impl(db : Sqlite3Handle) -> Bool = "moonbit_sqlite3_is_null"
@@ -87,7 +87,7 @@ extern "c" fn sqlite3_is_null_impl(db : Sqlite3Handle) -> Bool = "moonbit_sqlite
 extern "c" fn sqlite3_errmsg_impl(db : Sqlite3Handle) -> String = "moonbit_sqlite3_errmsg"
 
 ///|
-extern "c" fn sqlite3_errcode_impl(db : Sqlite3Handle) -> Int = "sqlite3_errcode"
+extern "c" fn sqlite3_errcode_impl(db : Sqlite3Handle) -> Int32 = "sqlite3_errcode"
 
 ///|
 /// `tail_offset` is measured in UTF-16 code units, or -1 when SQLite produces
@@ -96,8 +96,8 @@ extern "c" fn sqlite3_errcode_impl(db : Sqlite3Handle) -> Int = "sqlite3_errcode
 extern "c" fn sqlite3_prepare16_v2_impl(
   db : Sqlite3Handle,
   sql : String,
-  tail_offset : Ref[Int],
-  rescode : Ref[Int],
+  tail_offset : Ref[Int32],
+  rescode : Ref[Int32],
 ) -> Sqlite3StmtHandle = "moonbit_sqlite3_prepare16_v2"
 
 ///|
@@ -108,7 +108,7 @@ extern "c" fn sqlite3_prepare_job_impl(
   sql : String,
   notification : @types.Fd,
   discard_notification : @types.Fd,
-  rescode : Ref[Int],
+  rescode : Ref[Int32],
 ) -> Sqlite3JobHandle = "moonbit_sqlite3_prepare_job"
 
 ///|
@@ -119,13 +119,13 @@ extern "c" fn sqlite3_prepare_job_statement_impl(
 ///|
 extern "c" fn sqlite3_prepare_job_tail_offset_impl(
   job : Sqlite3JobHandle,
-) -> Int = "moonbit_sqlite3_prepare_job_tail_offset"
+) -> Int32 = "moonbit_sqlite3_prepare_job_tail_offset"
 
 ///|
 extern "c" fn sqlite3_prepare_job_release_impl(job : Sqlite3JobHandle) -> Unit = "moonbit_sqlite3_prepare_job_release"
 
 ///|
-extern "c" fn sqlite3_step_impl(stmt : Sqlite3StmtHandle) -> Int = "sqlite3_step"
+extern "c" fn sqlite3_step_impl(stmt : Sqlite3StmtHandle) -> Int32 = "sqlite3_step"
 
 ///|
 #borrow(rescode)
@@ -134,17 +134,19 @@ extern "c" fn sqlite3_step_job_impl(
   db : Sqlite3Handle,
   stmt : Sqlite3StmtHandle,
   notification : @types.Fd,
-  rescode : Ref[Int],
+  rescode : Ref[Int32],
 ) -> Sqlite3JobHandle = "moonbit_sqlite3_step_job"
 
 ///|
 extern "c" fn sqlite3_job_acquire_result_impl(job : Sqlite3JobHandle) -> Bool = "moonbit_sqlite3_job_acquire_result"
 
 ///|
-extern "c" fn sqlite3_job_rescode_impl(job : Sqlite3JobHandle) -> Int = "moonbit_sqlite3_job_rescode"
+extern "c" fn sqlite3_job_rescode_impl(job : Sqlite3JobHandle) -> Int32 = "moonbit_sqlite3_job_rescode"
 
 ///|
-extern "c" fn sqlite3_job_extended_rescode_impl(job : Sqlite3JobHandle) -> Int = "moonbit_sqlite3_job_extended_rescode"
+extern "c" fn sqlite3_job_extended_rescode_impl(
+  job : Sqlite3JobHandle,
+) -> Int32 = "moonbit_sqlite3_job_extended_rescode"
 
 ///|
 extern "c" fn sqlite3_job_message_impl(job : Sqlite3JobHandle) -> String = "moonbit_sqlite3_job_message"
@@ -159,16 +161,16 @@ extern "c" fn sqlite3_step_job_changes_impl(job : Sqlite3JobHandle) -> Int64 = "
 extern "c" fn sqlite3_step_job_release_impl(job : Sqlite3JobHandle) -> Unit = "moonbit_sqlite3_step_job_release"
 
 ///|
-extern "c" fn sqlite3_finalize_impl(stmt : Sqlite3StmtHandle) -> Int = "sqlite3_finalize"
+extern "c" fn sqlite3_finalize_impl(stmt : Sqlite3StmtHandle) -> Int32 = "sqlite3_finalize"
 
 ///|
-extern "c" fn sqlite3_column_count_impl(stmt : Sqlite3StmtHandle) -> Int = "sqlite3_column_count"
+extern "c" fn sqlite3_column_count_impl(stmt : Sqlite3StmtHandle) -> Int32 = "sqlite3_column_count"
 
 ///|
-extern "c" fn sqlite3_reset_impl(stmt : Sqlite3StmtHandle) -> Int = "sqlite3_reset"
+extern "c" fn sqlite3_reset_impl(stmt : Sqlite3StmtHandle) -> Int32 = "sqlite3_reset"
 
 ///|
-extern "c" fn sqlite3_clear_bindings_impl(stmt : Sqlite3StmtHandle) -> Int = "sqlite3_clear_bindings"
+extern "c" fn sqlite3_clear_bindings_impl(stmt : Sqlite3StmtHandle) -> Int32 = "sqlite3_clear_bindings"
 
 ///|
 extern "c" fn sqlite3_changes64_impl(db : Sqlite3Handle) -> Int64 = "sqlite3_changes64"
@@ -177,14 +179,14 @@ extern "c" fn sqlite3_changes64_impl(db : Sqlite3Handle) -> Int64 = "sqlite3_cha
 #borrow(available)
 extern "c" fn sqlite3_column_name_copy_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
-  available : Ref[Int],
+  idx : Int32,
+  available : Ref[Int32],
 ) -> String = "moonbit_sqlite3_column_name"
 
 ///|
 fn sqlite3_column_name_impl(
   statement : Sqlite3StmtHandle,
-  index : Int,
+  index : Int32,
 ) -> String? {
   let available = Ref(0)
   let name = sqlite3_column_name_copy_impl(statement, index, available)
@@ -200,62 +202,62 @@ fn sqlite3_column_name_impl(
 ///|
 extern "c" fn sqlite3_bind_int_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
-  value : Int,
-) -> Int = "sqlite3_bind_int"
+  idx : Int32,
+  value : Int32,
+) -> Int32 = "sqlite3_bind_int"
 
 ///|
 extern "c" fn sqlite3_bind_int64_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
+  idx : Int32,
   value : Int64,
-) -> Int = "sqlite3_bind_int64"
+) -> Int32 = "sqlite3_bind_int64"
 
 ///|
 extern "c" fn sqlite3_bind_double_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
+  idx : Int32,
   value : Double,
-) -> Int = "sqlite3_bind_double"
+) -> Int32 = "sqlite3_bind_double"
 
 ///|
 #borrow(text)
 extern "c" fn sqlite3_bind_text_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
+  idx : Int32,
   text : String,
-  text_offset : Int,
-  text_length : Int,
-) -> Int = "moonbit_sqlite3_bind_text"
+  text_offset : Int32,
+  text_length : Int32,
+) -> Int32 = "moonbit_sqlite3_bind_text"
 
 ///|
 #borrow(blob)
 extern "c" fn sqlite3_bind_blob_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
+  idx : Int32,
   blob : Bytes,
-  blob_offset : Int,
-  blob_length : Int,
-) -> Int = "moonbit_sqlite3_bind_blob"
+  blob_offset : Int32,
+  blob_length : Int32,
+) -> Int32 = "moonbit_sqlite3_bind_blob"
 
 ///|
 extern "c" fn sqlite3_bind_null_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
-) -> Int = "sqlite3_bind_null"
+  idx : Int32,
+) -> Int32 = "sqlite3_bind_null"
 
 // --- Column functions ---
 
 ///|
 extern "c" fn sqlite3_column_int64_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
+  idx : Int32,
 ) -> Int64 = "sqlite3_column_int64"
 
 ///|
 extern "c" fn sqlite3_column_double_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
+  idx : Int32,
 ) -> Double = "sqlite3_column_double"
 
 ///|
@@ -265,8 +267,8 @@ extern "c" fn sqlite3_column_double_impl(
 extern "c" fn sqlite3_column_text_impl(
   db : Sqlite3Handle,
   stmt : Sqlite3StmtHandle,
-  idx : Int,
-  rescode : Ref[Int],
+  idx : Int32,
+  rescode : Ref[Int32],
 ) -> String = "moonbit_sqlite3_column_text"
 
 ///|
@@ -274,15 +276,15 @@ extern "c" fn sqlite3_column_text_impl(
 extern "c" fn sqlite3_column_blob_impl(
   db : Sqlite3Handle,
   stmt : Sqlite3StmtHandle,
-  idx : Int,
-  rescode : Ref[Int],
+  idx : Int32,
+  rescode : Ref[Int32],
 ) -> Bytes = "moonbit_sqlite3_column_blob"
 
 ///|
 extern "c" fn sqlite3_column_type_impl(
   stmt : Sqlite3StmtHandle,
-  idx : Int,
-) -> Int = "sqlite3_column_type"
+  idx : Int32,
+) -> Int32 = "sqlite3_column_type"
 
 ///|
 extern "c" fn sqlite3_open_job_discard_impl(

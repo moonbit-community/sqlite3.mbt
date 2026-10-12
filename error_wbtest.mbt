@@ -1,6 +1,6 @@
 ///|
 test "decode every primary SQLite error code" {
-  let cases : Array[(Int, ErrorCode)] = [
+  let cases : Array[(Int32, ErrorCode)] = [
     (1, Error),
     (2, Internal),
     (3, Perm),
@@ -40,7 +40,7 @@ test "decode every primary SQLite error code" {
 
 ///|
 test "decode every extended SQLite error code" {
-  let cases : Array[(Int, ExtendedCode)] = [
+  let cases : Array[(Int32, ExtendedCode)] = [
     (257, ErrorMissingCollSeq),
     (513, ErrorRetry),
     (769, ErrorSnapshot),
