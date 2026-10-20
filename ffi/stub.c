@@ -7,6 +7,20 @@
 
 /* ---------- FFI functions ---------- */
 
+typedef int (*moonbit_sqlite3_authorizer)(void *, int, const char *,
+                                        const char *, const char *,
+                                        const char *);
+
+MOONBIT_FFI_EXPORT
+moonbit_sqlite3_authorizer moonbit_sqlite3_null_authorizer(void) {
+  return NULL;
+}
+
+MOONBIT_FFI_EXPORT
+void *moonbit_sqlite3_null_authorizer_context(void) {
+  return NULL;
+}
+
 MOONBIT_FFI_EXPORT
 sqlite3 *
 moonbit_sqlite3_open_v2(

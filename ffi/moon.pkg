@@ -29,6 +29,7 @@ options(
     "ffi_async.mbt": [ "native" ],
     "ffi_async_wasm.mbt": [ "wasm" ],
     "ffi_native.mbt": [ "native" ],
+    "authorizer_native.mbt": [ "native" ],
     "ffi_wasm.mbt": [ "wasm" ],
   },
 )

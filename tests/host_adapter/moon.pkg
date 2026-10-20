@@ -1,0 +1,10 @@
+import {
+  "moonbit-community/sqlite3/ffi",
+  "moonbitlang/async",
+} for "test"
+
+supported_targets = "native"
+
+options(
+  "native-stub": [ "authorizer.c" ],
+)

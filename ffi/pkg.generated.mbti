@@ -64,6 +64,8 @@ pub fn sqlite3_prepare_job(Sqlite3Executor, Sqlite3, String, @ref.Ref[Int32]) ->
 
 pub fn sqlite3_reset(Sqlite3Stmt) -> Int32
 
+pub fn sqlite3_set_authorizer(Sqlite3, authorizer? : Sqlite3Authorizer, context? : Sqlite3AuthorizerContext) -> Int32
+
 pub fn sqlite3_step(Sqlite3Stmt) -> Int32
 
 pub fn sqlite3_step_job(Sqlite3Executor, Sqlite3, Sqlite3Stmt, @ref.Ref[Int32]) -> Sqlite3StepJob raise
@@ -72,6 +74,12 @@ pub fn sqlite3_step_job(Sqlite3Executor, Sqlite3, Sqlite3Stmt, @ref.Ref[Int32]) 
 
 // Types and methods
 type Sqlite3
+
+#external
+pub type Sqlite3Authorizer
+
+#external
+pub type Sqlite3AuthorizerContext
 
 type Sqlite3Executor
 

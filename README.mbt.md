@@ -250,6 +250,8 @@ domain guarantees that the value fits. Request `Value` when distinguishing
 
 The `moonbit-community/sqlite3/ffi` package exposes opaque database, statement, and executor handles with SQLite result codes. It is intended for native hosts implementing their own lifecycle and error handling. Unlike `Connection` and `Statement`, these functions do not track closed handles, current rows, or outstanding jobs for the caller. Every acquired resource must be explicitly released.
 
+Native hosts can install a C authorizer with `sqlite3_set_authorizer`; omitting the authorizer clears it. The callback must have SQLite's exact C signature. Its optional context points to caller-owned native storage that must outlive the registration. SQLite can invoke the callback on an executor worker, so it must not access MoonBit-managed objects. Authorizer policy belongs to the embedding host.
+
 ## Error Codes
 
 `ErrorCode` represents SQLite's primary error categories, while `ExtendedCode` provides the additional classification returned by some SQLite operations. Unknown codes from a newer SQLite runtime are preserved as `Unknown(raw_code)`.
