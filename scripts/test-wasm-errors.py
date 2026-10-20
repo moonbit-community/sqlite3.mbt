@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix="sqlite3-wasm-errors-") as directory:
         ),
     )
     shutil.copytree(root / ".mooncakes", project / ".mooncakes", symlinks=True)
-    adapter = project / "internal/ffi/ffi_async_wasm.mbt"
+    adapter = project / "ffi/ffi_async_wasm.mbt"
     source = adapter.read_text()
     pipe = "let (reader, writer) = @pipe.pipe()"
     status = 'fn sqlite3_job_get_err_import(job : UInt64) -> Int32 = "moonbitlang/async" "thread_pool/job_get_err"'

@@ -3,7 +3,7 @@ import {
   "moonbitlang/async/os_error",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/lexbuf",
-  "moonbit-community/sqlite3/internal/ffi",
+  "moonbit-community/sqlite3/ffi",
 }
 
 import {

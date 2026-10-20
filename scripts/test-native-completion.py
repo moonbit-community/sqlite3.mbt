@@ -8,7 +8,7 @@ import tempfile
 
 root = Path(__file__).resolve().parent.parent
 moon_root = Path(shutil.which("moon")).resolve().parent.parent
-ffi = root / "internal/ffi"
+ffi = root / "ffi"
 with tempfile.TemporaryDirectory(prefix="sqlite3-completion-") as directory:
     executable = Path(directory) / "test"
     subprocess.run(

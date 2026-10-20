@@ -246,6 +246,10 @@ domain guarantees that the value fits. Request `Value` when distinguishing
 - The package exposes result-column counts and names, but not declared column types. `Value` reports the initial runtime storage class of a value in the current row. That class is cached before typed coercion, so reading the same cell through a typed decoder first does not change the later `Value` variant.
 - The package is intentionally focused on SQLite basics and does not add transaction wrappers, batch helpers, or named-parameter support.
 
+## Low-level FFI
+
+The `moonbit-community/sqlite3/ffi` package exposes opaque database, statement, and executor handles with SQLite result codes. It is intended for native hosts implementing their own lifecycle and error handling. Unlike `Connection` and `Statement`, these functions do not track closed handles, current rows, or outstanding jobs for the caller. Every acquired resource must be explicitly released.
+
 ## Error Codes
 
 `ErrorCode` represents SQLite's primary error categories, while `ExtendedCode` provides the additional classification returned by some SQLite operations. Unknown codes from a newer SQLite runtime are preserved as `Unknown(raw_code)`.
