@@ -28,7 +28,7 @@ pub(all) enum ErrorCode {
   NotADb
   Notice
   Warning
-  Unknown(Int)
+  Unknown(Int32)
 } derive(Debug, Eq)
 
 ///|
@@ -108,7 +108,7 @@ pub(all) enum ExtendedCode {
   NoticeRbu
   WarningAutoIndex
   AuthUser
-  Unknown(Int)
+  Unknown(Int32)
 } derive(Debug, Eq)
 
 ///|
@@ -117,7 +117,7 @@ pub suberror SqliteError {
 } derive(Debug, Eq)
 
 ///|
-fn decode_error_code(raw_code : Int) -> ErrorCode {
+fn decode_error_code(raw_code : Int32) -> ErrorCode {
   match raw_code & 0xFF {
     1 => Error
     2 => Internal
@@ -152,7 +152,7 @@ fn decode_error_code(raw_code : Int) -> ErrorCode {
 }
 
 ///|
-fn decode_extended_code(raw_code : Int) -> ExtendedCode? {
+fn decode_extended_code(raw_code : Int32) -> ExtendedCode? {
   if raw_code == (raw_code & 0xFF) {
     return None
   }
@@ -239,7 +239,7 @@ fn decode_extended_code(raw_code : Int) -> ExtendedCode? {
 }
 
 ///|
-fn sqlite_error(raw_code : Int, message : String) -> SqliteError {
+fn sqlite_error(raw_code : Int32, message : String) -> SqliteError {
   SqliteError(
     code=decode_error_code(raw_code),
     extended=decode_extended_code(raw_code),

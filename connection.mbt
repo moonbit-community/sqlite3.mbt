@@ -2,7 +2,7 @@
 priv struct ConnectionState {
   mut database : @ffi.Sqlite3?
   mut executor : @ffi.Sqlite3Executor?
-  mut jobs_in_flight : Int
+  mut jobs_in_flight : Int32
 }
 
 ///|
@@ -65,7 +65,7 @@ fn Connection::finish_job(self : Connection) -> Unit {
 }
 
 ///|
-fn Connection::error(self : Connection, raw_code : Int) -> SqliteError {
+fn Connection::error(self : Connection, raw_code : Int32) -> SqliteError {
   match self.0.val.database {
     Some(db) => sqlite_error(raw_code, @ffi.sqlite3_errmsg(db))
     None => sqlite_error(raw_code, "sqlite3: database connection is closed")
@@ -73,13 +73,13 @@ fn Connection::error(self : Connection, raw_code : Int) -> SqliteError {
 }
 
 ///|
-const SQLITE_OPEN_READWRITE : Int = 0x00000002
+const SQLITE_OPEN_READWRITE : Int32 = 0x00000002
 
 ///|
-const SQLITE_OPEN_CREATE : Int = 0x00000004
+const SQLITE_OPEN_CREATE : Int32 = 0x00000004
 
 ///|
-const SQLITE_OPEN_FULLMUTEX : Int = 0x00010000
+const SQLITE_OPEN_FULLMUTEX : Int32 = 0x00010000
 
 ///|
 pub fn Connection::open(filename : String) -> Connection raise SqliteError {

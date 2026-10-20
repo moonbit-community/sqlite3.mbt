@@ -50,7 +50,7 @@ pub(all) enum ErrorCode {
   NotADb
   Notice
   Warning
-  Unknown(Int)
+  Unknown(Int32)
 } derive(Eq, @debug.Debug)
 
 pub(all) enum ExtendedCode {
@@ -129,14 +129,14 @@ pub(all) enum ExtendedCode {
   NoticeRbu
   WarningAutoIndex
   AuthUser
-  Unknown(Int)
+  Unknown(Int32)
 } derive(Eq, @debug.Debug)
 
 type Statement
-pub fn[T : Bind] Statement::bind(Self, index~ : Int, T) -> Unit raise SqliteError
-pub fn[T : Column] Statement::column(Self, index~ : Int) -> T raise SqliteError
-pub fn Statement::column_count(Self) -> Int raise SqliteError
-pub fn Statement::column_name(Self, index~ : Int) -> String raise SqliteError
+pub fn[T : Bind] Statement::bind(Self, index~ : Int32, T) -> Unit raise SqliteError
+pub fn[T : Column] Statement::column(Self, index~ : Int32) -> T raise SqliteError
+pub fn Statement::column_count(Self) -> Int32 raise SqliteError
+pub fn Statement::column_name(Self, index~ : Int32) -> String raise SqliteError
 pub fn Statement::finalize(Self) -> Unit raise SqliteError
 pub fn Statement::reset(Self, clear_bindings? : Bool) -> Unit raise SqliteError
 pub fn Statement::step(Self) -> Bool raise SqliteError
@@ -161,7 +161,7 @@ pub impl Column for Value
 
 // Traits
 trait Bind
-pub impl Bind for Int
+pub impl Bind for Int32
 pub impl Bind for Int64
 pub impl Bind for Double
 pub impl Bind for String

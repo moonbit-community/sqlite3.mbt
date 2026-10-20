@@ -1,6 +1,6 @@
 ///|
 trait Column {
-  fn column(Statement, Int) -> Self raise SqliteError
+  fn column(Statement, Int32) -> Self raise SqliteError
 }
 
 ///|
