@@ -3,7 +3,7 @@ struct Statement {
   mut handle : @ffi.Sqlite3Stmt?
   step_in_flight : Ref[Bool]
   mut has_row : Bool
-  mut column_types : Array[Int]?
+  mut column_types : Array[Int32]?
   connection : Connection
 }
 
@@ -32,8 +32,8 @@ fn Statement::get_handle(
 ///|
 fn Statement::column_info(
   self : Statement,
-  index : Int,
-) -> (@ffi.Sqlite3Stmt, Int) raise SqliteError {
+  index : Int32,
+) -> (@ffi.Sqlite3Stmt, Int32) raise SqliteError {
   self.ensure_not_in_flight()
   let _ = self.connection.handle()
   match (self.handle, self.has_row) {
@@ -66,12 +66,12 @@ fn Statement::column_info(
 }
 
 ///|
-fn Statement::error(self : Statement, raw_code : Int) -> SqliteError {
+fn Statement::error(self : Statement, raw_code : Int32) -> SqliteError {
   self.connection.error(raw_code)
 }
 
 ///|
-fn sql_tail_is_ignorable(sql : String, start : Int) -> Bool {
+fn sql_tail_is_ignorable(sql : String, start : Int32) -> Bool {
   let scanner = @lexbuf.StringScanner::{ data: sql[start:], cursor: 0, }
   for ;; {
     lexscan scanner with longest {
@@ -129,7 +129,7 @@ pub fn Connection::prepare(
 /// from the previous execution.
 pub fn Statement::reset(
   self : Statement,
-  clear_bindings? : Bool = false,
+  clear_bindings~ : Bool = false,
 ) -> Unit raise SqliteError {
   let handle = self.get_handle()
   let database = self.connection.handle()
@@ -161,7 +161,7 @@ pub fn Statement::reset(
 /// Return the number of columns in the statement's result set.
 ///
 /// Statements that do not return rows have zero columns.
-pub fn Statement::column_count(self : Statement) -> Int raise SqliteError {
+pub fn Statement::column_count(self : Statement) -> Int32 raise SqliteError {
   let handle = self.get_handle()
   let database = self.connection.handle()
   @ffi.sqlite3_db_mutex_enter(database)
@@ -176,7 +176,7 @@ pub fn Statement::column_count(self : Statement) -> Int raise SqliteError {
 /// name when present.
 pub fn Statement::column_name(
   self : Statement,
-  index~ : Int,
+  index~ : Int32,
 ) -> String raise SqliteError {
   let handle = self.get_handle()
   let database = self.connection.handle()
@@ -201,7 +201,7 @@ pub fn Statement::column_name(
 ///|
 pub fn[T : Bind] Statement::bind(
   self : Statement,
-  index~ : Int,
+  index~ : Int32,
   val : T,
 ) -> Unit raise SqliteError {
   let _ = self.get_handle()
@@ -214,7 +214,7 @@ pub fn[T : Bind] Statement::bind(
 ///|
 pub fn[T : Column] Statement::column(
   self : Statement,
-  index~ : Int,
+  index~ : Int32,
 ) -> T raise SqliteError {
   let _ = self.get_handle()
   let database = self.connection.handle()

@@ -1,6 +1,6 @@
 ///|
 trait Bind {
-  fn bind(Statement, Int, Self) -> Unit raise SqliteError
+  fn bind(Statement, Int32, Self) -> Unit raise SqliteError
 }
 
 ///|
@@ -12,7 +12,7 @@ pub impl Bind for Double with fn bind(stmt, param_index, value) {
 }
 
 ///|
-pub impl Bind for Int with fn bind(stmt, param_index, value) {
+pub impl Bind for Int32 with fn bind(stmt, param_index, value) {
   let rescode = @ffi.sqlite3_bind_int(stmt.get_handle(), param_index, value)
   if rescode != SQLITE_OK {
     raise stmt.error(rescode)

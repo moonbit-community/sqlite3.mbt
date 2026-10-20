@@ -9,11 +9,11 @@ priv enum Sqlite3Worker {
 priv struct Sqlite3ExecutorHandle {
   mutex : @async.Mutex
   mut worker : Sqlite3Worker
-  mut next_id : Int
+  mut next_id : Int32
 }
 
 ///|
-fn sqlite3_executor_create_impl(rescode : Ref[Int]) -> Sqlite3ExecutorHandle {
+fn sqlite3_executor_create_impl(rescode : Ref[Int32]) -> Sqlite3ExecutorHandle {
   rescode.val = SQLITE_OK
   { mutex: @async.Mutex(), worker: Uninitialized, next_id: 0, }
 }
@@ -70,8 +70,8 @@ struct Sqlite3StepJob(Sqlite3Job)
 #borrow(filename)
 fn sqlite3_make_open_job_import(
   filename : Bytes,
-  length : Int,
-  flags : Int,
+  length : Int32,
+  flags : Int32,
 ) -> UInt64 = "moonbitlang/sqlite" "sqlite3_make_open_job"
 
 ///|
@@ -80,8 +80,8 @@ fn sqlite3_make_open_job_import(
 fn sqlite3_make_prepare_job_import(
   database : UInt64,
   sql : String,
-  offset : Int,
-  length : Int,
+  offset : Int32,
+  length : Int32,
 ) -> UInt64 = "moonbitlang/sqlite" "sqlite3_make_prepare_job"
 
 ///|
@@ -96,13 +96,13 @@ fn sqlite3_make_discard_job_import(job : UInt64) -> UInt64 = "moonbitlang/sqlite
 ///|
 #unsafe_skip_stub_check
 #borrow(output)
-fn sqlite3_job_result_import(job : UInt64, output : FixedArray[Int]) -> Unit = "moonbitlang/sqlite" "sqlite3_job_result"
+fn sqlite3_job_result_import(job : UInt64, output : FixedArray[Int32]) -> Unit = "moonbitlang/sqlite" "sqlite3_job_result"
 
 ///|
 fn sqlite3_take_job_handle_import(job : UInt64) -> UInt64 = "moonbitlang/sqlite" "sqlite3_take_job_handle"
 
 ///|
-fn sqlite3_job_message16_length_import(job : UInt64) -> Int = "moonbitlang/sqlite" "sqlite3_job_message16_length"
+fn sqlite3_job_message16_length_import(job : UInt64) -> Int32 = "moonbitlang/sqlite" "sqlite3_job_message16_length"
 
 ///|
 #unsafe_skip_stub_check
@@ -110,15 +110,15 @@ fn sqlite3_job_message16_length_import(job : UInt64) -> Int = "moonbitlang/sqlit
 fn sqlite3_job_message16_import(
   job : UInt64,
   output : String,
-  capacity : Int,
-) -> Int = "moonbitlang/sqlite" "sqlite3_job_message16"
+  capacity : Int32,
+) -> Int32 = "moonbitlang/sqlite" "sqlite3_job_message16"
 
 ///|
 fn sqlite3_free_job_import(job : UInt64) -> Unit = "moonbitlang/async" "thread_pool/free_job"
 
 ///|
 fn sqlite3_spawn_worker_with_pipe_import(
-  completion_id : Int,
+  completion_id : Int32,
   job : UInt64,
   writer : UInt64,
 ) -> UInt64 = "moonbitlang/async" "thread_pool/spawn_worker_with_pipe"
@@ -126,7 +126,7 @@ fn sqlite3_spawn_worker_with_pipe_import(
 ///|
 fn sqlite3_wake_worker_import(
   worker : UInt64,
-  completion_id : Int,
+  completion_id : Int32,
   job : UInt64,
 ) -> Unit = "moonbitlang/async" "thread_pool/wake_worker"
 
@@ -134,14 +134,14 @@ fn sqlite3_wake_worker_import(
 fn sqlite3_free_worker_import(worker : UInt64) -> Unit = "moonbitlang/async" "thread_pool/free_worker"
 
 ///|
-fn sqlite3_job_get_err_import(job : UInt64) -> Int = "moonbitlang/async" "thread_pool/job_get_err"
+fn sqlite3_job_get_err_import(job : UInt64) -> Int32 = "moonbitlang/async" "thread_pool/job_get_err"
 
 ///|
 pub fn sqlite3_open_job(
   executor : Sqlite3Executor,
   filename : Bytes,
-  flags : Int,
-  rescode : Ref[Int],
+  flags : Int32,
+  rescode : Ref[Int32],
 ) -> Sqlite3OpenJob raise {
   executor.0.reserve_notification()
   rescode.val = SQLITE_OK
@@ -156,7 +156,7 @@ pub fn sqlite3_prepare_job(
   executor : Sqlite3Executor,
   database : Sqlite3,
   sql : String,
-  rescode : Ref[Int],
+  rescode : Ref[Int32],
 ) -> Sqlite3PrepareJob raise {
   executor.0.reserve_notification()
   rescode.val = SQLITE_OK
@@ -171,7 +171,7 @@ pub fn sqlite3_step_job(
   executor : Sqlite3Executor,
   database : Sqlite3,
   statement : Sqlite3Stmt,
-  rescode : Ref[Int],
+  rescode : Ref[Int32],
 ) -> Sqlite3StepJob raise {
   executor.0.reserve_notification()
   rescode.val = SQLITE_OK
@@ -244,7 +244,9 @@ async fn Sqlite3Job::wait(self : Sqlite3Job) -> Unit {
 }
 
 ///|
-fn Sqlite3Job::result(self : Sqlite3Job) -> (Int, Int, String, Int, Int64?) {
+fn Sqlite3Job::result(
+  self : Sqlite3Job,
+) -> (Int32, Int32, String, Int32, Int64?) {
   // The host copies a 24-byte little-endian record; Wasm Ints are 32 bits.
   let output = FixedArray::make(6, 0)
   sqlite3_job_result_import(self.handle, output)
@@ -279,7 +281,7 @@ pub async fn Sqlite3OpenJob::wait(self : Sqlite3OpenJob) -> Unit {
 }
 
 ///|
-pub fn Sqlite3OpenJob::result(self : Sqlite3OpenJob) -> (Int, Int, String) {
+pub fn Sqlite3OpenJob::result(self : Sqlite3OpenJob) -> (Int32, Int32, String) {
   let (code, extended, message, _, _) = self.0.result()
   (code, extended, message)
 }
@@ -307,7 +309,7 @@ pub async fn Sqlite3PrepareJob::wait(self : Sqlite3PrepareJob) -> Unit {
 ///|
 pub fn Sqlite3PrepareJob::result(
   self : Sqlite3PrepareJob,
-) -> (Int, Int, String, Int) {
+) -> (Int32, Int32, String, Int32) {
   let (code, extended, message, tail, _) = self.0.result()
   (code, extended, message, tail)
 }
@@ -337,7 +339,7 @@ pub async fn Sqlite3StepJob::wait(self : Sqlite3StepJob) -> Unit {
 ///|
 pub fn Sqlite3StepJob::result(
   self : Sqlite3StepJob,
-) -> (Int, Int, String, Int64?) {
+) -> (Int32, Int32, String, Int64?) {
   let (code, extended, message, _, changes) = self.0.result()
   (code, extended, message, changes)
 }

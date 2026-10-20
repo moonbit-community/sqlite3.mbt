@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory(prefix="sqlite3-wasm-errors-") as directory:
     adapter = project / "internal/ffi/ffi_async_wasm.mbt"
     source = adapter.read_text()
     pipe = "let (reader, writer) = @pipe.pipe()"
-    status = 'fn sqlite3_job_get_err_import(job : UInt64) -> Int = "moonbitlang/async" "thread_pool/job_get_err"'
+    status = 'fn sqlite3_job_get_err_import(job : UInt64) -> Int32 = "moonbitlang/async" "thread_pool/job_get_err"'
     assert source.count(pipe) == 1 and source.count(status) == 1
     source = source.replace(pipe, '''let (reader, writer) = if sqlite3_test_failure.val < 0 {
       sqlite3_test_failure.val = 0
