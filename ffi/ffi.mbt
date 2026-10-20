@@ -199,3 +199,10 @@ pub fn sqlite3_column_blob(
 pub fn sqlite3_column_type(statement : Sqlite3Stmt, index : Int32) -> Int32 {
   sqlite3_column_type_impl(statement.0, index)
 }
+
+///|
+/// Return SQLite's current extended diagnostic, including the constraint or
+/// I/O subtype that is not present in the primary error code.
+pub fn sqlite3_extended_errcode(database : Sqlite3) -> Int32 {
+  sqlite3_extended_errcode_impl(database.0)
+}

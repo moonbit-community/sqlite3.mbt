@@ -295,3 +295,6 @@ extern "c" fn sqlite3_open_job_discard_impl(
 extern "c" fn sqlite3_prepare_job_discard_impl(
   job : Sqlite3JobHandle,
 ) -> Sqlite3JobHandle = "moonbit_sqlite3_prepare_job_discard"
+
+///|
+extern "c" fn sqlite3_extended_errcode_impl(db : Sqlite3Handle) -> Int32 = "sqlite3_extended_errcode"

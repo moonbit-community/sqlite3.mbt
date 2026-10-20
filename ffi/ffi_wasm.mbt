@@ -485,3 +485,11 @@ fn sqlite3_column_type_impl(
 ) -> Int32 {
   sqlite3_column_type_import(statement.0, index)
 }
+
+///|
+fn sqlite3_extended_errcode_import(database : UInt64) -> Int32 = "moonbitlang/sqlite" "sqlite3_extended_errcode"
+
+///|
+fn sqlite3_extended_errcode_impl(database : Sqlite3Handle) -> Int32 {
+  sqlite3_extended_errcode_import(database.0)
+}
