@@ -30,7 +30,7 @@ with tempfile.TemporaryDirectory(prefix="sqlite3-wasm-errors-") as directory:
     } else {
       @pipe.pipe()
     }''')
-    source = source.replace(status, '''fn sqlite3_real_job_get_err_import(job : UInt64) -> Int = "moonbitlang/async" "thread_pool/job_get_err"
+    source = source.replace(status, '''fn sqlite3_real_job_get_err_import(job : UInt64) -> Int32 = "moonbitlang/async" "thread_pool/job_get_err"
 
 ///|
 let sqlite3_test_failure : Ref[Int] = Ref(0)
