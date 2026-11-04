@@ -26,7 +26,7 @@ jobs:
           moon update
       - name: moon check
         run: |
-          moon check --target native
+          moon check --target native --deny-warn
       - name: publish
         run: |
           credentials="$HOME/.moon/credentials.json"

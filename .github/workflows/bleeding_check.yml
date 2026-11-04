@@ -48,7 +48,7 @@ jobs:
           "$moonrun_path" --version
 
       - name: moon check
-        run: moon check --target wasm
+        run: moon check --target wasm --deny-warn
 
       - name: info check
         run: |
