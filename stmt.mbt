@@ -71,8 +71,8 @@ fn Statement::error(self : Statement, raw_code : Int32) -> SqliteError {
 }
 
 ///|
-fn sql_tail_is_ignorable(sql : String, start : Int32) -> Bool {
-  let scanner = @lexbuf.StringScanner::{ data: sql[start:], cursor: 0, }
+fn sql_tail_is_ignorable(sql : StringView) -> Bool {
+  let scanner = @lexbuf.StringScanner::{ data: sql, cursor: 0, }
   for ;; {
     lexscan scanner with longest {
       re"^[ \t\n\f\r;\uFEFF]+" => continue
@@ -90,7 +90,37 @@ pub fn Connection::prepare(
   self : Connection,
   stmt : String,
 ) -> Statement raise SqliteError {
-  if stmt.contains_code_unit(0x0000) {
+  guard self.prepare_impl(stmt[:], single=true) is Some((statement, _)) else {
+    raise sqlite_misuse("sqlite3: SQL does not contain a statement")
+  }
+  statement
+}
+
+///|
+/// Prepare the first SQL statement and return its unconsumed remainder.
+///
+/// Returns `None` when the input contains only whitespace, comments, or empty
+/// semicolons. The remainder is a view into the original input and may itself
+/// contain only comments. SQLite determines statement boundaries, including
+/// semicolons inside strings and trigger bodies.
+///
+/// The caller must finalize each returned statement. When iterating a migration,
+/// execute each statement before preparing the next: later statements may depend
+/// on schema changes made by earlier ones. NUL code units are rejected.
+pub fn Connection::prepare_next(
+  self : Connection,
+  sql : StringView,
+) -> (Statement, StringView)? raise SqliteError {
+  self.prepare_impl(sql, single=false)
+}
+
+///|
+fn Connection::prepare_impl(
+  self : Connection,
+  sql : StringView,
+  single~ : Bool,
+) -> (Statement, StringView)? raise SqliteError {
+  if sql.contains_code_unit(0x0000) {
     raise sqlite_misuse("sqlite3: SQL contains a NUL code unit")
   }
   let db = self.handle()
@@ -98,27 +128,32 @@ pub fn Connection::prepare(
   defer @ffi.sqlite3_db_mutex_leave(db)
   let tail_offset = Ref(-1)
   let rescode = Ref(SQLITE_OK)
-  let out = @ffi.sqlite3_prepare16_v2(db, stmt, tail_offset, rescode)
+  let out = @ffi.sqlite3_prepare16_v2(db, sql, tail_offset, rescode)
   if rescode.val != SQLITE_OK {
     raise sqlite_error(rescode.val, @ffi.sqlite3_errmsg(db))
   }
   if tail_offset.val < 0 {
-    raise sqlite_misuse("sqlite3: SQL does not contain a statement")
+    return None
   }
-  if tail_offset.val > stmt.length() ||
-    !sql_tail_is_ignorable(stmt, tail_offset.val) {
+  if tail_offset.val == 0 || tail_offset.val > sql.length() {
+    let _ = @ffi.sqlite3_finalize(out)
+    raise sqlite_misuse("sqlite3: invalid SQL tail offset")
+  }
+  let remainder = sql[tail_offset.val:]
+  if single && !sql_tail_is_ignorable(remainder) {
     let _ = @ffi.sqlite3_finalize(out)
     raise sqlite_misuse("sqlite3: SQL contains more than one statement")
   }
   // Only a successful, non-empty prepare reaches this point. A handle from a
   // failed prepare is never stored in public Statement state.
-  {
+  let statement = {
     handle: Some(out),
     step_in_flight: Ref(false),
     has_row: false,
     column_types: None,
     connection: self,
   }
+  Some((statement, remainder))
 }
 
 ///|

@@ -51,7 +51,7 @@ pub fn sqlite3_open_job(
 pub fn sqlite3_prepare_job(
   executor : Sqlite3Executor,
   database : Sqlite3,
-  sql : String,
+  sql : StringView,
   rescode : Ref[Int32],
 ) -> Sqlite3PrepareJob raise {
   let (notification, notifier) = @pipe.pipe()
@@ -64,7 +64,9 @@ pub fn sqlite3_prepare_job(
       handle: sqlite3_prepare_job_impl(
         executor.0,
         database.0,
-        sql,
+        sql.data(),
+        sql.start_offset(),
+        sql.length(),
         notifier.fd(),
         discard_notifier.fd(),
         rescode,

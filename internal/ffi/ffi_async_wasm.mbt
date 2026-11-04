@@ -155,13 +155,18 @@ pub fn sqlite3_open_job(
 pub fn sqlite3_prepare_job(
   executor : Sqlite3Executor,
   database : Sqlite3,
-  sql : String,
+  sql : StringView,
   rescode : Ref[Int32],
 ) -> Sqlite3PrepareJob raise {
   executor.0.reserve_notification()
   rescode.val = SQLITE_OK
   Sqlite3PrepareJob({
-    handle: sqlite3_make_prepare_job_import(database.0.0, sql, 0, sql.length()),
+    handle: sqlite3_make_prepare_job_import(
+      database.0.0,
+      sql.data(),
+      sql.start_offset(),
+      sql.length(),
+    ),
     executor,
   })
 }

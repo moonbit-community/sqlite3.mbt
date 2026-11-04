@@ -58,9 +58,9 @@ pub fn sqlite3_open_job(Sqlite3Executor, Bytes, Int32, @ref.Ref[Int32]) -> Sqlit
 
 pub fn sqlite3_open_v2(Bytes, Int32, @ref.Ref[Int32]) -> Sqlite3
 
-pub fn sqlite3_prepare16_v2(Sqlite3, String, @ref.Ref[Int32], @ref.Ref[Int32]) -> Sqlite3Stmt
+pub fn sqlite3_prepare16_v2(Sqlite3, StringView, @ref.Ref[Int32], @ref.Ref[Int32]) -> Sqlite3Stmt
 
-pub fn sqlite3_prepare_job(Sqlite3Executor, Sqlite3, String, @ref.Ref[Int32]) -> Sqlite3PrepareJob raise
+pub fn sqlite3_prepare_job(Sqlite3Executor, Sqlite3, StringView, @ref.Ref[Int32]) -> Sqlite3PrepareJob raise
 
 pub fn sqlite3_reset(Sqlite3Stmt) -> Int32
 

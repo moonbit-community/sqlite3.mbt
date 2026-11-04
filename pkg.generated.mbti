@@ -8,19 +8,25 @@ import {
 // Values
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub suberror SqliteError {
   SqliteError(code~ : ErrorCode, extended~ : ExtendedCode?, msg~ : String)
-} derive(Eq, @debug.Debug)
+}
 
 // Types and methods
 type Connection
 pub fn Connection::changes(Self) -> Int64 raise SqliteError
 pub fn Connection::close(Self) -> Unit raise SqliteError
+pub fn Connection::execute_batch(Self, String) -> Unit raise SqliteError
+pub async fn Connection::execute_batch_async(Self, String) -> Unit
 pub fn Connection::open(String) -> Self raise SqliteError
 pub async fn Connection::open_async(String) -> Self
 pub fn Connection::prepare(Self, String) -> Statement raise SqliteError
 pub async fn Connection::prepare_async(Self, String) -> Statement
+pub fn Connection::prepare_next(Self, StringView) -> (Statement, StringView)? raise SqliteError
+pub async fn Connection::prepare_next_async(Self, StringView) -> (Statement, StringView)?
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ErrorCode {
   Error
   Internal
@@ -51,8 +57,9 @@ pub(all) enum ErrorCode {
   Notice
   Warning
   Unknown(Int32)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ExtendedCode {
   ErrorMissingCollSeq
   ErrorRetry
@@ -130,7 +137,7 @@ pub(all) enum ExtendedCode {
   WarningAutoIndex
   AuthUser
   Unknown(Int32)
-} derive(Eq, @debug.Debug)
+}
 
 type Statement
 pub fn[T : Bind] Statement::bind(Self, index~ : Int32, T) -> Unit raise SqliteError
@@ -142,18 +149,20 @@ pub fn Statement::reset(Self, clear_bindings? : Bool) -> Unit raise SqliteError
 pub fn Statement::step(Self) -> Bool raise SqliteError
 pub async fn Statement::step_async(Self) -> StepResult
 
+#derive(Eq, @debug.Debug)
 pub(all) enum StepResult {
   Row
   Done(changes~ : Int64?)
-} derive(Eq, @debug.Debug)
+}
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Value {
   Null
   Integer(Int64)
   Real(Double)
   Text(String)
   Blob(Bytes)
-} derive(Eq, @debug.Debug)
+}
 pub impl Bind for Value
 pub impl Column for Value
 

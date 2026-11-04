@@ -65,6 +65,37 @@ async test "async I/O error contract" {
     assert_eq(value, 42L)
   }
 
+  // Tail-aware prepare shares the same diagnostic and unclaimed-result cleanup.
+  for fault in [-1, 1] {
+    let connection = @sqlite3.Connection::open(":memory:")
+    defer connection.close()
+    @ffi.sqlite3_test_fail_after(fault)
+    try connection.prepare_next_async("SELECT 1; SELECT 2") catch {
+      @sqlite3.SqliteError(code=IoErr, msg~, ..) => assert_true(msg.length() > 0)
+      error => fail("expected SqliteError(IoErr), got \{error}")
+    } noraise {
+      result => {
+        if result is Some((statement, _)) { statement.finalize() }
+        fail("expected injected prepare_next failure")
+      }
+    }
+    connection.execute_batch_async("SELECT 42")
+  }
+
+  // Fail batch setup, first prepare, step, and the next prepare in turn.
+  for fault in [-1, 1, 2, 3] {
+    let connection = @sqlite3.Connection::open(":memory:")
+    defer connection.close()
+    @ffi.sqlite3_test_fail_after(fault)
+    try connection.execute_batch_async("CREATE TABLE entries(v); SELECT 1") catch {
+      @sqlite3.SqliteError(code=IoErr, msg~, ..) => assert_true(msg.length() > 0)
+      error => fail("expected SqliteError(IoErr), got \{error}")
+    } noraise {
+      _ => fail("expected injected batch failure")
+    }
+    connection.execute_batch_async("SELECT 42")
+  }
+
   // rejected prepare translates disposal worker errors
   {
     let connection = @sqlite3.Connection::open(":memory:")
