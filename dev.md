@@ -108,7 +108,7 @@ Jobs copy inputs before suspension, retain host resource leases until release,
 and return immutable diagnostics and change counts. Cancellation is shielded
 through completion. Cancellation and SQL-tail rejection submit a discard job
 on the same worker and pipe while the original result is still unclaimed. The
-published `moonbitlang/async` 0.21.2 dependency needs no patch or additional
+published `moonbitlang/async` 0.22.7 dependency needs no patch or additional
 guest event loop.
 
 `scripts/test-wasm-errors.py` tests the public error contract by injecting pipe
@@ -121,7 +121,7 @@ construction misses failures reported during completion or disposal.
 Build the known compatible runtime and select it with `MOONRUN_OVERRIDE`:
 
 ```bash
-cargo install --git https://github.com/moonbitlang/moon --rev 230003a6671939d12dc20521498c91df367c27a7 --locked --root .moonrun --bin moonrun moonrun
+cargo install --git https://github.com/moonbitlang/moon --rev c2f89b042ac947f503cf374dcea545776c2f6128 --locked --root .moonrun --bin moonrun moonrun
 moon check --target wasm
 MOONBIT_ASYNC_CHECK_FD_LEAK=1 MOONRUN_OVERRIDE="$PWD/.moonrun/bin/moonrun" moon test --target wasm
 ```

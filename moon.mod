@@ -1,6 +1,6 @@
 name = "moonbit-community/sqlite3"
 
-version = "0.2.3"
+version = "0.2.4"
 
 readme = "README.md"
 
@@ -15,5 +15,5 @@ description = "A lightweight, low-level SQLite3 binding for MoonBit, providing a
 preferred_target = "native"
 
 import {
-  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.7",
 }
