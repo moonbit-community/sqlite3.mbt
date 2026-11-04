@@ -61,11 +61,20 @@ pub fn sqlite3_db_mutex_leave(database : Sqlite3) -> Unit {
 ///|
 pub fn sqlite3_prepare16_v2(
   database : Sqlite3,
-  sql : String,
+  sql : StringView,
   tail_offset : Ref[Int32],
   rescode : Ref[Int32],
 ) -> Sqlite3Stmt {
-  Sqlite3Stmt(sqlite3_prepare16_v2_impl(database.0, sql, tail_offset, rescode))
+  Sqlite3Stmt(
+    sqlite3_prepare16_v2_impl(
+      database.0,
+      sql.data(),
+      sql.start_offset(),
+      sql.length(),
+      tail_offset,
+      rescode,
+    ),
+  )
 }
 
 ///|

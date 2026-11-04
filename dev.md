@@ -23,6 +23,14 @@ use a mutable struct that also records current-row validity and retains the
 originating connection for error-message capture. Copies therefore observe the
 same closed or finalized state and cannot reuse a released raw handle.
 
+`prepare_next` and `prepare_next_async` accept bounded SQL views and return the
+unconsumed view alongside each statement. The internal prepare adapters report
+tail offsets relative to the supplied view in UTF-16 code units; the synchronous
+Wasm adapter subtracts the view's starting offset from the host's backing-string
+offset. Async jobs copy only the input view before suspension. Strict `prepare`
+operations share this preparation logic but validate the remainder before
+publishing a statement, preserving worker disposal for rejected async results.
+
 ## Native FFI adapters
 
 Functions whose MoonBit native ABI already matches SQLite bind directly to the

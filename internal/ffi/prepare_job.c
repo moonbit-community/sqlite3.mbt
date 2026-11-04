@@ -102,6 +102,8 @@ moonbit_sqlite3_prepare_job(
   moonbit_sqlite3_executor_t *executor,
   sqlite3 *database,
   moonbit_string_t sql,
+  int32_t sql_offset,
+  int32_t sql_length,
   moonbit_sqlite3_notification_t notification,
   moonbit_sqlite3_notification_t discard_notification,
   int32_t *rescode
@@ -110,7 +112,6 @@ moonbit_sqlite3_prepare_job(
     *rescode = SQLITE_MISUSE;
     return NULL;
   }
-  int32_t sql_length = Moonbit_array_length(sql);
   if (sql_length > INT32_MAX / (int32_t)sizeof(uint16_t)) {
     *rescode = SQLITE_TOOBIG;
     return NULL;
@@ -129,7 +130,7 @@ moonbit_sqlite3_prepare_job(
     return NULL;
   }
   if (sql_size > 0) {
-    memcpy(prepare_job->sql, sql, sql_size);
+    memcpy(prepare_job->sql, sql + sql_offset, sql_size);
   }
   prepare_job->database = database;
   prepare_job->sql_length = sql_length;

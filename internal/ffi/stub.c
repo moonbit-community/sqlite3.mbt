@@ -58,26 +58,28 @@ sqlite3_stmt *
 moonbit_sqlite3_prepare16_v2(
   sqlite3 *db,
   moonbit_string_t sql,
+  int32_t sql_offset,
+  int32_t sql_length,
   int32_t *tail_offset,
   int32_t *rescode
 ) {
   *tail_offset = -1;
-  int32_t sql_len = Moonbit_array_length(sql);
-  if (sql_len > INT32_MAX / (int32_t)sizeof(uint16_t)) {
+  if (sql_length > INT32_MAX / (int32_t)sizeof(uint16_t)) {
     *rescode = SQLITE_TOOBIG;
     return NULL;
   }
   const void *tail = NULL;
   sqlite3_stmt *stmt = NULL;
+  const uint16_t *start = sql + sql_offset;
   *rescode = sqlite3_prepare16_v2(
     db,
-    (const void *)sql,
-    sql_len * (int32_t)sizeof(uint16_t),
+    (const void *)start,
+    sql_length * (int32_t)sizeof(uint16_t),
     &stmt,
     &tail
   );
   if (*rescode == SQLITE_OK && stmt) {
-    *tail_offset = (int32_t)((const uint16_t *)tail - sql);
+    *tail_offset = (int32_t)((const uint16_t *)tail - start);
   }
   return stmt;
 }

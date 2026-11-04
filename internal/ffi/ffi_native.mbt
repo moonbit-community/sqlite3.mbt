@@ -90,12 +90,14 @@ extern "c" fn sqlite3_errmsg_impl(db : Sqlite3Handle) -> String = "moonbit_sqlit
 extern "c" fn sqlite3_errcode_impl(db : Sqlite3Handle) -> Int32 = "sqlite3_errcode"
 
 ///|
-/// `tail_offset` is measured in UTF-16 code units, or -1 when SQLite produces
-/// no statement.
+/// `tail_offset` is measured in UTF-16 code units relative to the input view,
+/// or -1 when SQLite produces no statement.
 #borrow(sql, tail_offset, rescode)
 extern "c" fn sqlite3_prepare16_v2_impl(
   db : Sqlite3Handle,
   sql : String,
+  sql_offset : Int32,
+  sql_length : Int32,
   tail_offset : Ref[Int32],
   rescode : Ref[Int32],
 ) -> Sqlite3StmtHandle = "moonbit_sqlite3_prepare16_v2"
@@ -106,6 +108,8 @@ extern "c" fn sqlite3_prepare_job_impl(
   executor : Sqlite3ExecutorHandle,
   db : Sqlite3Handle,
   sql : String,
+  sql_offset : Int32,
+  sql_length : Int32,
   notification : @types.Fd,
   discard_notification : @types.Fd,
   rescode : Ref[Int32],

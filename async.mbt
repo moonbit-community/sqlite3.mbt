@@ -5,10 +5,11 @@
 /// For a potentially writing statement, `Done(changes=Some(count))` carries
 /// the connection's direct row-change count captured before its mutex was
 /// released.
+#derive(Debug, Eq)
 pub(all) enum StepResult {
   Row
   Done(changes~ : Int64?)
-} derive(Debug, Eq)
+}
 
 ///|
 // Translate I/O failures at each public operation's boundary, covering job
@@ -81,6 +82,31 @@ pub async fn Connection::prepare_async(
   self : Connection,
   sql : String,
 ) -> Statement {
+  guard self.prepare_async_impl(sql[:], single=true) is Some((statement, _)) else {
+    raise sqlite_misuse("sqlite3: SQL does not contain a statement")
+  }
+  statement
+}
+
+///|
+/// Prepare the first SQL statement on a worker and return its unconsumed view.
+///
+/// Like `prepare_next`, returns `None` when there is no statement. Jobs for one
+/// connection execute in submission order. Cancellation waits for preparation
+/// and disposes of an unclaimed statement on the worker before propagating.
+pub async fn Connection::prepare_next_async(
+  self : Connection,
+  sql : StringView,
+) -> (Statement, StringView)? {
+  self.prepare_async_impl(sql, single=false)
+}
+
+///|
+async fn Connection::prepare_async_impl(
+  self : Connection,
+  sql : StringView,
+  single~ : Bool,
+) -> (Statement, StringView)? {
   try {
     if sql.contains_code_unit(0x0000) {
       raise sqlite_misuse("sqlite3: SQL contains a NUL code unit")
@@ -112,13 +138,21 @@ pub async fn Connection::prepare_async(
       )
     }
     if tail_offset < 0 {
-      raise sqlite_misuse("sqlite3: SQL does not contain a statement")
+      if @async.is_being_cancelled() {
+        @async.pause()
+      }
+      return None
     }
-    let invalid_tail = tail_offset > sql.length() ||
-      !sql_tail_is_ignorable(sql, tail_offset)
+    let invalid_offset = tail_offset == 0 || tail_offset > sql.length()
+    let invalid_tail = !invalid_offset &&
+      single &&
+      !sql_tail_is_ignorable(sql[tail_offset:])
     let cancelled = @async.is_being_cancelled()
-    if invalid_tail || cancelled {
+    if invalid_offset || invalid_tail || cancelled {
       @async.protect_from_cancel(() => job.discard())
+    }
+    if invalid_offset {
+      raise sqlite_misuse("sqlite3: invalid SQL tail offset")
     }
     if invalid_tail {
       raise sqlite_misuse("sqlite3: SQL contains more than one statement")
@@ -126,14 +160,14 @@ pub async fn Connection::prepare_async(
     if cancelled {
       @async.pause()
     }
-    let statement = job.take_statement()
-    {
-      handle: Some(statement),
+    let statement = {
+      handle: Some(job.take_statement()),
       step_in_flight: Ref(false),
       has_row: false,
       column_types: None,
       connection: self,
     }
+    Some((statement, sql[tail_offset:]))
   } catch {
     @os_error.OSError(_) as error => raise async_io_error(error)
     error => raise error

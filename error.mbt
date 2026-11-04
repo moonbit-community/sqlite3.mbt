@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum ErrorCode {
   Error
   Internal
@@ -29,9 +30,10 @@ pub(all) enum ErrorCode {
   Notice
   Warning
   Unknown(Int32)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum ExtendedCode {
   ErrorMissingCollSeq
   ErrorRetry
@@ -109,12 +111,13 @@ pub(all) enum ExtendedCode {
   WarningAutoIndex
   AuthUser
   Unknown(Int32)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub suberror SqliteError {
   SqliteError(code~ : ErrorCode, extended~ : ExtendedCode?, msg~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 fn decode_error_code(raw_code : Int32) -> ErrorCode {

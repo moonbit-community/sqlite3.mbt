@@ -4,13 +4,14 @@
 /// Use `Value` when the SQLite storage class is not known statically or when
 /// SQL `NULL` must be preserved. Concrete `bind` and `column` calls remain the
 /// simpler choice when the expected MoonBit type is already known.
+#derive(Debug, Eq)
 pub(all) enum Value {
   Null
   Integer(Int64)
   Real(Double)
   Text(String)
   Blob(Bytes)
-} derive(Debug, Eq)
+}
 
 ///|
 const SQLITE_INTEGER = 1

@@ -8,6 +8,7 @@ This package supports the `native` and `wasm` targets. The native backend vendor
 
 - Thin wrapper design with a small API surface that stays close to SQLite's native workflow.
 - Support for prepared statements, positional parameter binding, and row-by-row result reading.
+- SQLite-parsed script iteration with synchronous and asynchronous preparation.
 - Explicit statement reuse, result-column metadata, and affected-row counts.
 - Structured primary and extended error codes with the SQLite diagnostic message captured at the failure site.
 - The native backend ships with `sqlite3.c` and `sqlite3.h`, so it does not rely on a system-installed SQLite.
@@ -81,6 +82,36 @@ test "quick start" {
 5. Use `Statement::column(index=...)` to read column values from the current row. It raises `SqliteError` with `code=Misuse` unless the preceding `step()` returned `true`.
 6. Call `Statement::finalize()` to release the statement.
 7. Call `Connection::close()` when you are done with the connection.
+
+## SQL Scripts
+
+`prepare_next` prepares one statement and returns its unconsumed `StringView`.
+SQLite handles semicolons in strings, comments, and trigger bodies. Execute each
+statement before preparing the remainder, since later statements may depend on
+earlier schema changes. Empty or comment-only input returns `None`.
+
+```mbt check
+///|
+test "iterate a SQL script" {
+  let conn = @sqlite3.Connection::open(":memory:")
+  defer conn.close()
+  let sql = "CREATE TABLE entries(v TEXT); INSERT INTO entries VALUES (?1);"
+  for remaining = sql[:], index = 0 {
+    guard conn.prepare_next(remaining) is Some((statement, rest)) else { break }
+    defer statement.finalize()
+    if index == 1 {
+      statement.bind(index=1, "a;b")
+    }
+    assert_eq(statement.step(), false)
+    continue rest, index + 1
+  }
+}
+```
+
+`prepare_next_async` provides the corresponding asynchronous preparation on native
+and Wasm. Callers control parameter binding, execution, result handling, statement
+finalization, and transactions. These preparation APIs let applications build
+script execution policies around their own needs.
 
 ## Multi-Row Queries and BLOB Values
 
@@ -178,6 +209,7 @@ test "error handling" {
 - `Connection::open_async(filename)` (native and Wasm): open a database without blocking the MoonBit event loop.
 - `Connection::prepare(sql)`: create a prepared statement.
 - `Connection::prepare_async(sql)` (native and Wasm): prepare one statement without blocking the MoonBit event loop.
+- `Connection::prepare_next(sql)` and `Connection::prepare_next_async(sql)`: prepare the first statement in a `StringView`, returning `Some((statement, remainder))`, or `None` when no statement remains. Callers finalize returned statements.
 - `Connection::changes()`: return the rows changed by the most recently completed `INSERT`, `UPDATE`, or `DELETE` on the connection.
 - `Connection::close()`: close the database connection.
 
@@ -244,7 +276,7 @@ domain guarantees that the value fits. Request `Value` when distinguishing
 - SQL and `String` values cross both backend boundaries as UTF-16 code units. Native targets require little-endian UTF-16, while WebAssembly memory is little-endian by definition. SQLite converts text when the database file uses a different encoding. Use `Bytes` when the value is raw binary data rather than text.
 - `Connection::open` and `Connection::open_async` use `sqlite3_open_v2`, so a new database defaults to UTF-8. To select UTF-16LE or UTF-16BE storage, run `PRAGMA encoding` before creating any schema objects; this choice is independent of the native string API.
 - The package exposes result-column counts and names, but not declared column types. `Value` reports the initial runtime storage class of a value in the current row. That class is cached before typed coercion, so reading the same cell through a typed decoder first does not change the later `Value` variant.
-- The package is intentionally focused on SQLite basics and does not add transaction wrappers, batch helpers, or named-parameter support.
+- The package is intentionally focused on SQLite basics and does not add transaction wrappers or named-parameter support.
 
 ## Error Codes
 

@@ -243,6 +243,8 @@ fn sqlite3_changes64_impl(database : Sqlite3Handle) -> Int64 {
 fn sqlite3_prepare16_v2_impl(
   database : Sqlite3Handle,
   sql : String,
+  sql_offset : Int32,
+  sql_length : Int32,
   tail_offset : Ref[Int32],
   rescode : Ref[Int32],
 ) -> Sqlite3StmtHandle {
@@ -252,13 +254,15 @@ fn sqlite3_prepare16_v2_impl(
   rescode.val = sqlite3_prepare16_v2_import(
     database.0,
     sql,
-    0,
-    sql.length(),
+    sql_offset,
+    sql_length,
     statement,
     tail,
   )
   if rescode.val == 0 && statement.val != null_handle {
-    tail_offset.val = tail.val
+    // The synchronous host import returns a backing-string offset. Keep the
+    // shared adapter contract relative to the supplied view, like async jobs.
+    tail_offset.val = tail.val - sql_offset
   } else {
     tail_offset.val = -1
   }
