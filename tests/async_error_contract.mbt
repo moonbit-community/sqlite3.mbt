@@ -79,21 +79,18 @@ async test "async I/O error contract" {
         fail("expected injected prepare_next failure")
       }
     }
-    connection.execute_batch_async("SELECT 42")
-  }
-
-  // Fail batch setup, first prepare, step, and the next prepare in turn.
-  for fault in [-1, 1, 2, 3] {
-    let connection = @sqlite3.Connection::open(":memory:")
-    defer connection.close()
-    @ffi.sqlite3_test_fail_after(fault)
-    try connection.execute_batch_async("CREATE TABLE entries(v); SELECT 1") catch {
-      @sqlite3.SqliteError(code=IoErr, msg~, ..) => assert_true(msg.length() > 0)
-      error => fail("expected SqliteError(IoErr), got \{error}")
-    } noraise {
-      _ => fail("expected injected batch failure")
+    guard
+      connection.prepare_next_async("SELECT 42; SELECT 43") is Some(
+        (statement, rest),
+      )
+    else {
+      fail("missing statement after injected prepare_next failure")
     }
-    connection.execute_batch_async("SELECT 42")
+    defer statement.finalize()
+    assert_eq(rest, " SELECT 43")
+    assert_eq(statement.step_async(), @sqlite3.StepResult::Row)
+    let value : Int64 = statement.column(index=0)
+    assert_eq(value, 42L)
   }
 
   // rejected prepare translates disposal worker errors

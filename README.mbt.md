@@ -8,7 +8,7 @@ This package supports the `native` and `wasm` targets. The native backend vendor
 
 - Thin wrapper design with a small API surface that stays close to SQLite's native workflow.
 - Support for prepared statements, positional parameter binding, and row-by-row result reading.
-- SQLite-parsed script iteration and synchronous/asynchronous batch execution.
+- SQLite-parsed script iteration with synchronous and asynchronous preparation.
 - Explicit statement reuse, result-column metadata, and affected-row counts.
 - Structured primary and extended error codes with the SQLite diagnostic message captured at the failure site.
 - The native backend ships with `sqlite3.c` and `sqlite3.h`, so it does not rely on a system-installed SQLite.
@@ -108,43 +108,10 @@ test "iterate a SQL script" {
 }
 ```
 
-When no binding or row processing is needed, `execute_batch` runs the script and
-finalizes its statements automatically. Result rows are discarded, empty scripts
-succeed, and the first error stops execution.
-
-```mbt check
-///|
-test "execute a SQL script" {
-  let conn = @sqlite3.Connection::open(":memory:")
-  defer conn.close()
-  conn.execute_batch(
-    (
-      #|CREATE TABLE src(v TEXT);
-      #|CREATE TABLE audit(v TEXT);
-      #|CREATE TRIGGER src_audit AFTER INSERT ON src BEGIN
-      #|  INSERT INTO audit VALUES (new.v);
-      #|  INSERT INTO audit VALUES (new.v || '!');
-      #|END;
-      #|INSERT INTO src VALUES ('a;b');
-    ),
-  )
-  let query = conn.prepare("SELECT count(*) FROM audit")
-  defer query.finalize()
-  assert_true(query.step())
-  let count : Int64 = query.column(index=0)
-  assert_eq(count, 2L)
-}
-```
-
-`prepare_next_async` and `execute_batch_async` provide the corresponding async
-operations on native and Wasm. Batch preparation and stepping run on the worker;
-statement finalization remains synchronous. Cancellation waits for submitted work,
-releases the current statement, and skips the remainder. Other tasks may interleave
-operations between jobs, so coordinate exclusive connection access when needed.
-
-Batch helpers do not start, commit, or roll back transactions implicitly. Earlier
-changes may remain after an error or cancellation. If a script starts a transaction
-and fails before `COMMIT`, the caller is responsible for its rollback.
+`prepare_next_async` provides the corresponding asynchronous preparation on native
+and Wasm. Callers control parameter binding, execution, result handling, statement
+finalization, and transactions. These preparation APIs let applications build
+script execution policies around their own needs.
 
 ## Multi-Row Queries and BLOB Values
 
@@ -243,7 +210,6 @@ test "error handling" {
 - `Connection::prepare(sql)`: create a prepared statement.
 - `Connection::prepare_async(sql)` (native and Wasm): prepare one statement without blocking the MoonBit event loop.
 - `Connection::prepare_next(sql)` and `Connection::prepare_next_async(sql)`: prepare the first statement in a `StringView`, returning `Some((statement, remainder))`, or `None` when no statement remains. Callers finalize returned statements.
-- `Connection::execute_batch(sql)` and `Connection::execute_batch_async(sql)`: execute a script, discard rows, and finalize statements. Stop on the first error; transaction management is explicit.
 - `Connection::changes()`: return the rows changed by the most recently completed `INSERT`, `UPDATE`, or `DELETE` on the connection.
 - `Connection::close()`: close the database connection.
 

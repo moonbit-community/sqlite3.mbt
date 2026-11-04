@@ -17,8 +17,6 @@ pub suberror SqliteError {
 type Connection
 pub fn Connection::changes(Self) -> Int64 raise SqliteError
 pub fn Connection::close(Self) -> Unit raise SqliteError
-pub fn Connection::execute_batch(Self, String) -> Unit raise SqliteError
-pub async fn Connection::execute_batch_async(Self, String) -> Unit
 pub fn Connection::open(String) -> Self raise SqliteError
 pub async fn Connection::open_async(String) -> Self
 pub fn Connection::prepare(Self, String) -> Statement raise SqliteError

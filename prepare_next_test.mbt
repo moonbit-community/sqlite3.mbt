@@ -46,6 +46,45 @@ async test "prepare_next preserves bounded UTF-16 views and parameter binding" {
 }
 
 ///|
+async test "prepare_next preserves trigger bodies while iterating schema changes" {
+  for asynchronous in [false, true] {
+    let connection = @sqlite3.Connection::open(":memory:")
+    let sql =
+      #|CREATE TABLE src(v TEXT);
+      #|CREATE TABLE audit(v TEXT);
+      #|CREATE TRIGGER src_audit AFTER INSERT ON src BEGIN
+      #|  INSERT INTO audit VALUES (new.v);
+      #|  /* semicolon; inside a comment */
+      #|  INSERT INTO audit VALUES (new.v || '!');
+      #|END;
+      #|INSERT INTO src VALUES ('a;b');
+    let count = for remaining = sql[:], count = 0 {
+      let next = if asynchronous {
+        connection.prepare_next_async(remaining)
+      } else {
+        connection.prepare_next(remaining)
+      }
+      guard next is Some((statement, rest)) else { break count }
+      // Execute schema changes before preparing statements that depend on them.
+      assert_eq(statement.step(), false)
+      statement.finalize()
+      continue rest, count + 1
+    }
+    assert_eq(count, 4)
+    let query = connection.prepare("SELECT v FROM audit ORDER BY rowid")
+    assert_true(query.step())
+    let first : String = query.column(index=0)
+    assert_eq(first, "a;b")
+    assert_true(query.step())
+    let second : String = query.column(index=0)
+    assert_eq(second, "a;b!")
+    assert_eq(query.step(), false)
+    query.finalize()
+    connection.close()
+  }
+}
+
+///|
 async test "prepare_next distinguishes empty input from invalid SQL" {
   for asynchronous in [false, true] {
     let connection = @sqlite3.Connection::open(":memory:")
