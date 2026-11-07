@@ -3,6 +3,11 @@ priv struct ConnectionState {
   mut database : @ffi.Sqlite3?
   mut executor : @ffi.Sqlite3Executor?
   mut jobs_in_flight : Int32
+  /// Nesting depth of explicit transactions started through
+  /// `Connection::transaction`. SQLite itself does not nest `BEGIN`, so the
+  /// wrapper tracks depth to turn accidental nesting into a misuse error
+  /// instead of an opaque SQLite error.
+  mut txn_depth : Int32
 }
 
 ///|
@@ -26,7 +31,9 @@ fn Connection::from_open_database(
   database : @ffi.Sqlite3,
   executor : @ffi.Sqlite3Executor?,
 ) -> Connection {
-  Connection(Ref({ database: Some(database), executor, jobs_in_flight: 0, }))
+  Connection(
+    Ref({ database: Some(database), executor, jobs_in_flight: 0, txn_depth: 0, }),
+  )
 }
 
 ///|
