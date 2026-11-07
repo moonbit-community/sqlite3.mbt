@@ -17,12 +17,16 @@ pub suberror SqliteError {
 type Connection
 pub fn Connection::changes(Self) -> Int64 raise SqliteError
 pub fn Connection::close(Self) -> Unit raise SqliteError
+pub fn Connection::execute(Self, String, params? : Array[Value]) -> Int64 raise SqliteError
 pub fn Connection::open(String) -> Self raise SqliteError
 pub async fn Connection::open_async(String) -> Self
 pub fn Connection::prepare(Self, String) -> Statement raise SqliteError
 pub async fn Connection::prepare_async(Self, String) -> Statement
 pub fn Connection::prepare_next(Self, StringView) -> (Statement, StringView)? raise SqliteError
 pub async fn Connection::prepare_next_async(Self, StringView) -> (Statement, StringView)?
+pub fn Connection::query(Self, String, params? : Array[Value]) -> Array[Row] raise SqliteError
+pub fn Connection::transaction(Self, mode? : TransactionMode) -> Transaction raise SqliteError
+pub fn[T] Connection::with_transaction(Self, mode? : TransactionMode, () -> T raise) -> T raise
 
 #derive(Eq, @debug.Debug)
 pub(all) enum ErrorCode {
@@ -137,13 +141,30 @@ pub(all) enum ExtendedCode {
   Unknown(Int32)
 }
 
+#derive(Eq, @debug.Debug)
+pub struct Row {
+  // private fields
+}
+pub fn Row::column_count(Self) -> Int32
+pub fn Row::get(Self, index~ : Int32) -> Value raise
+pub fn Row::get_blob(Self, index~ : Int32) -> Bytes raise
+pub fn Row::get_by_name(Self, name~ : String) -> Value raise
+pub fn Row::get_int(Self, index~ : Int32) -> Int64 raise
+pub fn Row::get_real(Self, index~ : Int32) -> Double raise
+pub fn Row::get_text(Self, index~ : Int32) -> String raise
+pub fn Row::index_of(Self, name~ : String) -> Int32?
+pub fn Row::name(Self, index~ : Int32) -> String raise
+pub fn Row::names(Self) -> Array[String]
+
 type Statement
 pub fn[T : Bind] Statement::bind(Self, index~ : Int32, T) -> Unit raise SqliteError
+pub fn Statement::bind_all(Self, Array[Value]) -> Unit raise SqliteError
 pub fn[T : Column] Statement::column(Self, index~ : Int32) -> T raise SqliteError
 pub fn Statement::column_count(Self) -> Int32 raise SqliteError
 pub fn Statement::column_name(Self, index~ : Int32) -> String raise SqliteError
 pub fn Statement::finalize(Self) -> Unit raise SqliteError
 pub fn Statement::reset(Self, clear_bindings? : Bool) -> Unit raise SqliteError
+pub fn Statement::row(Self) -> Row raise SqliteError
 pub fn Statement::step(Self) -> Bool raise SqliteError
 pub async fn Statement::step_async(Self) -> StepResult
 
@@ -151,6 +172,19 @@ pub async fn Statement::step_async(Self) -> StepResult
 pub(all) enum StepResult {
   Row
   Done(changes~ : Int64?)
+}
+
+pub struct Transaction {
+  // private fields
+}
+pub fn Transaction::commit(Self) -> Unit raise SqliteError
+pub fn Transaction::rollback(Self) -> Unit raise SqliteError
+
+#derive(Eq, @debug.Debug)
+pub(all) enum TransactionMode {
+  Deferred
+  Immediate
+  Exclusive
 }
 
 #derive(Eq, @debug.Debug)
