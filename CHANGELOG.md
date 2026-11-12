@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.5 - 2026-11-12
+
 ### Changed
 
 - Remove the `moonbitlang/core/lexbuf` dependency while preserving trailing
