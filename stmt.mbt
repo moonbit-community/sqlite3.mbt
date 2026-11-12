@@ -72,15 +72,23 @@ fn Statement::error(self : Statement, raw_code : Int32) -> SqliteError {
 
 ///|
 fn sql_tail_is_ignorable(sql : StringView) -> Bool {
-  let scanner = @lexbuf.StringScanner::{ data: sql, cursor: 0, }
-  for ;; {
-    lexscan scanner with longest {
-      re"^[ \t\n\f\r;\uFEFF]+" => continue
-      re"^--[^\n]*(\n|$)" => continue
-      re"^/[*]([^*]|[*]+[^*/])*[*]+/" => continue
-      re"^/[*]([^*]|[*]+[^*/])*[*]*$" => return true
-      re"^$" => return true
-      _ => return false
+  for remaining = sql {
+    match remaining {
+      [] => break true
+      [' ' | '\t' | '\n' | '\f' | '\r' | ';' | '\uFEFF', .. rest] =>
+        continue rest
+      ['-', '-', .. rest] =>
+        match rest.find("\n") {
+          Some(index) => continue rest[index + 1:]
+          None => break true
+        }
+      ['/', '*', .. rest] =>
+        match rest.find("*/") {
+          Some(index) => continue rest[index + 2:]
+          // SQLite accepts an unterminated trailing block comment.
+          None => break true
+        }
+      _ => break false
     }
   }
 }
